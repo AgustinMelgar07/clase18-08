@@ -60,3 +60,86 @@ public class Caja {
 
     }
 }
+------------------------------------
+import java.util.Scanner;
+
+public class Main {
+
+    public static void main(String[] args) {
+        // write your code here
+        // coleccion de clientes
+        // lista de clientes
+        Scanner s=new Scanner(System.in);
+        Clientes c1=new Clientes();
+        System.out.println("ingrese su numero de cliente");
+        c1.getNroCuenta();
+    }
+}
+-----------------------
+public class Caja {
+    //depositar (cta,monto)
+    // extrae (cta, monto)
+    private double deposita;
+    private double extrae;
+    public Clientes c1= new Clientes();
+
+    public  Caja(double deposita,double extrae){
+        this.deposita=deposita;
+        this.extrae=extrae;
+        this.c1=new Clientes();
+    }
+
+    public double getDeposita(){
+        return deposita;
+    }
+    public double getExtrae(){
+        return extrae;
+    }
+    public void deposito (double total){
+        if (c1.getNroCuenta()==1){
+            total=deposita+ c1.getSaldo();
+        }else if (c1.getNroCuenta()==2){
+            total=deposita+ c1.getSaldo();
+        } else if (c1.getNroCuenta()==3){
+            total=deposita+ c1.getSaldo();
+        }else if (c1.getNroCuenta()==4){
+            total=deposita+ c1.getSaldo();
+        }
+    }
+    public void extraccion (double total){
+        if (c1.getNroCuenta()==1){
+            total= c1.getSaldo()-extrae;
+        }else if (c1.getNroCuenta()==2){
+            total= c1.getSaldo()-extrae;
+        } else if (c1.getNroCuenta()==3){
+            total= c1.getSaldo()-extrae;
+        }else if (c1.getNroCuenta()==4){
+            total= c1.getSaldo()-extrae;
+        }
+
+    }
+}
+-----------------------------------
+public class Clientes  {
+    private int nroCuenta=0;
+    private double saldo=0;
+
+    public int getNroCuenta(){
+        return nroCuenta;
+    }
+    public double getSaldo(){
+        return saldo;
+    }
+    public void clientes (){
+        if (nroCuenta==1){
+            saldo =120000;
+        }else if (nroCuenta==2){
+            saldo =130000;
+        } else if (nroCuenta==3){
+            saldo =140000;
+        }else if (nroCuenta==4){
+            saldo =150000;
+        }
+    }
+
+}
