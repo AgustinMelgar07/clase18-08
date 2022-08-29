@@ -1,0 +1,27 @@
+public class CuentaCorriente {
+    private  double saldo;
+    private String nombreTirular;
+    private  long numeroCuenta;
+    private double total;
+    public CuentaCorriente (String nombreTirular, double saldo){
+        this.nombreTirular=nombreTirular;
+        this.saldo=saldo;
+    }
+    public String getNombreTirular(){
+        return nombreTirular;
+    }
+    public double getSaldo(){
+        return saldo;
+    }
+    public void ingreso (){
+        total=
+    }
+}
+
+-----------------------------------------
+public class Main {
+
+    public static void main(String[] args) {
+	// write your code here
+    }
+}
