@@ -1,0 +1,61 @@
+import java.util.Scanner;
+
+public class Caja {
+    //depositar (cta,monto)
+    // extrae (cta, monto)
+    Scanner s= new Scanner(System.in);
+    private double deposita;
+    private double extrae;
+    public Clientes c1= new Clientes(s.nextInt());
+    double total;
+
+
+
+    public double getDeposita(){
+        return deposita;
+    }
+    public double getExtrae(){
+        return extrae;
+    }
+    public double deposito (){
+        c1.clientes(c1.getNroCuenta());
+        return total=c1.getSaldo()+deposita;
+    }
+    public double extraccion (){
+        c1.clientes(c1.getNroCuenta());
+        return total=c1.getSaldo()-extrae;
+    }
+
+    public String toString(){
+        return "nro de cuenta"+c1.getNroCuenta()+
+                "saldo="+ c1.getSaldo();
+    }
+}
+------------------------------------------------------------------
+public class Clientes  {
+    private int nroCuenta;
+    private double saldo;
+public Clientes (int nroCuenta){
+    this.nroCuenta=nroCuenta;
+}
+    public int getNroCuenta(){
+        return nroCuenta;
+    }
+    public double getSaldo(){
+        return saldo;
+    }
+    public double clientes (int nroCuenta){
+        if (nroCuenta==1){
+            return saldo =100000;
+        }else if (nroCuenta==2){
+            return saldo =400000;
+        } else if (nroCuenta==3){
+            return saldo =300000;
+        }else if (nroCuenta==4){
+            return saldo =200000;
+        }
+        return saldo=0;
+    }
+
+}
+-------------------------------------------------
