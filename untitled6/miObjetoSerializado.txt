@@ -1,2 +1,0 @@
-Cliente{Nombre: dfg, DNI: 123, Activos: [Cuenta: {Nombre: fg, Monto: 123.0, Tipo: sdf}, Cuenta: {Nombre: dfg, Monto: 123.0, Tipo: dfg}]}
-Cliente{Nombre: sdfsd, DNI: 123123, Activos: [Cuenta: {Nombre: sdfsd, Monto: 12312.0, Tipo: sdfsd}, Cuenta: {Nombre: sdfsdf, Monto: 123123.0, Tipo: sdfsd}]}
