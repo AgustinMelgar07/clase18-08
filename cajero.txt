@@ -1,0 +1,500 @@
+using System.Net;
+using System.Threading;
+
+namespace CajeroAutomatico_LAB_III
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            Cajero cajero = new Cajero("Frondizi 1810");
+            CuentaBancaria cuentaBancaria = null;
+            BdCuentas bd = new BdCuentas();
+            Usuario us;
+            string nombre = "", contraseña = "";
+            bool us_control = true;
+
+            int switch_op = 0, cuenta_op = 0;
+
+            do
+            {
+                Console.WriteLine("Presione cualquier tecla para comenzar a operar.");
+                Console.ReadKey();
+
+                Console.WriteLine("¿Posee un usuario? \n1)si \n2)no");
+                switch_op = Convert.ToInt32(Console.ReadLine());
+
+                switch (switch_op)
+                {
+                    case 1:
+                        Console.WriteLine("Ingrese el nombre del titular: ");
+                        nombre += Console.ReadLine();
+
+                        Console.WriteLine("Ingrese la contraseña: ");
+                        contraseña += Console.ReadLine();
+                        List<CuentaBancaria> list = bd.getCuentas();
+
+
+                        if (list.Count() > 0)
+                        {
+                            foreach (CuentaBancaria cuenta in bd.getCuentas())
+                            {
+                                us = cuenta.GetUsuario();
+                                if (nombre == us.getNombre() && contraseña == us.getContraseña())
+                                {
+                                    cuenta_op = 0;
+                                    cuentaBancaria = cuenta;
+                                    us_control = true;
+                                    break;
+                                }
+                                else
+                                {
+                                    us_control = false;
+                                    Console.WriteLine("USUARIO INCORRECTO");
+                                }
+                            }
+                        }
+                        else
+                        {
+                            us_control = false;
+                            Console.WriteLine("USUARIO INCORRECTO");
+                        }
+
+
+                        while (us_control && cuenta_op != 4)
+                        {
+                            Console.WriteLine("Que operacion desea realizar: \n1) Extraccion \n2) Extraccion Preacordada \n3) Deposito \n4) Salir");
+                            cuenta_op = Convert.ToInt32(Console.ReadLine());
+                            if (cuenta_op == 1 && cuentaBancaria != null)
+                            {
+                                cajero.extraccion(cuentaBancaria);
+                            }
+                            else if (cuenta_op == 2 && cuentaBancaria != null)
+                            {
+                                cajero.extraccionPreacordada(cuentaBancaria);
+                            }
+                            else if (cuenta_op == 3 && cuentaBancaria != null)
+                            {
+                                cajero.deposito(cuentaBancaria);
+                            }
+                            else if (cuenta_op == 4)
+                            {
+                            }
+                            else
+                            {
+                                Console.WriteLine("Numero no valido");
+                            }
+                        }
+                        break;
+
+                    case 2:
+                        cuentaBancaria = cajero.crearCuenta();
+                        bd.guardarcuenta(cuentaBancaria);
+                        do
+                        {
+                            Console.WriteLine("Que operacion desea realizar: \n1) Extraccion \n2) Extraccion Preacordada \n3) Deposito \n4) Salir");
+                            cuenta_op = Convert.ToInt32(Console.ReadLine());
+                            if (cuenta_op == 1)
+                            {
+                                cajero.extraccion(cuentaBancaria);
+                            }
+                            else if (cuenta_op == 2)
+                            {
+                                cajero.extraccionPreacordada(cuentaBancaria);
+                            }
+                            else if (cuenta_op == 3)
+                            {
+                                cajero.deposito(cuentaBancaria);
+                            }
+                            else if (cuenta_op == 4)
+                            {
+                            }
+                            else
+                            {
+                                Console.WriteLine("Numero no valido");
+                            }
+                        } while (cuenta_op != 4);
+                        break;
+                }
+            } while (true);
+        }
+
+        class BdCuentas 
+        {
+            List<CuentaBancaria> cuentas;
+
+            public BdCuentas()
+            {
+                this.cuentas = new List<CuentaBancaria>(); 
+            }
+            public void guardarcuenta(CuentaBancaria cuenta)
+            {
+                cuentas.Add(cuenta);
+            }
+
+            public List<CuentaBancaria> getCuentas()
+            {
+                return this.cuentas;
+            }
+        }
+
+
+        class Cajero
+        {
+            private string direccion;
+            private int NroCajero;
+            
+            public Cajero(string direccion)
+            {
+                this.direccion = direccion;
+                this.NroCajero = CreateNroCajero();
+            }
+
+            private int CreateNroCajero()
+            {
+                Random rnd = new Random(Guid.NewGuid().GetHashCode());
+                int NroCajero = rnd.Next(1, 9999);
+                return NroCajero;
+            }
+
+            public CuentaBancaria crearCuenta()
+            {
+                string nombre = "", contraseña = "", controlContraseña = "", direccion = "", tipoUs=" ";
+                int op;
+                bool bandera = true;
+                DateTime fecha = DateTime.UtcNow;
+
+                do 
+                {
+                    Console.WriteLine("Ingrese su nombre: ");
+                    nombre += Console.ReadLine();
+                } while (nombre == null);
+
+                
+                do
+                {
+                    Console.WriteLine("Ingrese la contraseña: ");
+                    contraseña = Console.ReadLine();
+                    Console.WriteLine("Ingrese nuevamente la contraseña: ");
+                    controlContraseña = Console.ReadLine();
+                    if (controlContraseña == contraseña)
+                    {                   
+                        bandera = false;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Las contraseñas no coinciden.");
+                    }
+
+                } while (bandera || contraseña == null);
+
+                do
+                {
+                    Console.WriteLine("Ingrese su direccion: ");
+                    direccion = Console.ReadLine();
+                } while (direccion == null);
+
+                do
+                {
+                    Console.WriteLine("A continuacion seleccione con el numero la opcion correspondiente. \nActividad laboral: \n1) Activo laboralmente \n2) Jubilado ");
+                    op = Convert.ToInt32(Console.ReadLine());
+                    switch (op)
+                    {
+                        case 1:
+                            tipoUs = "Activo laboralmente";
+                            bandera = false;
+                            break;
+                        case 2:
+                            tipoUs = "Jubilado";
+                            bandera = false;
+                            break;
+                        case 3:
+                            Console.WriteLine("Opcion incorrecta, intentelo nuevamente.");
+                            bandera = true;
+                            break;
+                    }
+                } while (bandera);
+
+                Usuario usuario = new Usuario(nombre, contraseña, direccion, tipoUs);                
+                CuentaBancaria cuenta = new CuentaBancaria(fecha, usuario);
+                return cuenta;
+            }
+
+            public void deposito(CuentaBancaria cuenta)
+            {
+                string tipoOperacion = "Deposito";
+                DateTime fecha = DateTime.UtcNow;
+                int monto;
+                double saldoActual;
+
+                Console.WriteLine("Ingrese el monto que desea depositar depositar: ");
+                monto = Convert.ToInt32(Console.ReadLine());
+
+                Operacion operacion = new Operacion(fecha, this.NroCajero, tipoOperacion, monto);
+                cuenta.deposito(monto, operacion);
+                saldoActual = cuenta.getSaaldoActual();
+                Console.WriteLine($"Saldo: {saldoActual}");
+            }
+
+            public void extraccion(CuentaBancaria cuenta)
+            {
+                string tipoOperacion = "Extraccion";
+                DateTime fecha = DateTime.UtcNow;
+                double saldoActual;
+                int monto;
+                Usuario usuario = cuenta.GetUsuario();
+
+                Console.WriteLine("Ingrese el monto que desea retirar: ");
+                monto = Convert.ToInt32(Console.ReadLine());
+
+                if (cuenta.controlarTipoUs(monto, usuario))
+                {    
+                    Operacion operacion = new Operacion(fecha, this.NroCajero, tipoOperacion, monto);
+                    cuenta.extraccion(monto, operacion);
+                    saldoActual = cuenta.getSaaldoActual();
+                    Console.WriteLine($"Saldo: {saldoActual}");
+                }
+                else
+                {
+                    if (cuenta.controlarHistorial() && ((cuenta.getSaaldoActual() - monto) >= -80000))
+                    {
+                        Operacion operacion = new Operacion(fecha, this.NroCajero, tipoOperacion, monto);
+                        cuenta.extraccionPreacordada(monto, operacion);
+                        saldoActual = cuenta.getSaaldoActual();
+                        Console.WriteLine($"Saldo: {saldoActual}");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Saldo insuficiente");
+                    }
+                }
+            }
+
+            public void extraccionPreacordada(CuentaBancaria cuenta)
+            {
+                string tipoOperacion = "Extraccion Preacordada";
+                DateTime fecha = DateTime.UtcNow;
+                double saldoActual;
+                int monto;
+                Usuario usuario = cuenta.GetUsuario();
+
+                Console.WriteLine("Ingrese el monto que desea retirar: ");
+                monto = Convert.ToInt32(Console.ReadLine());
+
+                if (cuenta.controlarTipoUs(monto, usuario))
+                {
+                    Operacion operacion = new Operacion(fecha, this.NroCajero, tipoOperacion, monto);
+                    cuenta.extraccionPreacordada(monto, operacion);
+                    saldoActual = cuenta.getSaaldoActual();
+                    Console.WriteLine($"Saldo: {saldoActual}");
+                }
+                else
+                {
+                    if (cuenta.controlarHistorial() && ((cuenta.getSaaldoActual() - monto) >= -80000))
+                    {
+                        Operacion operacion = new Operacion(fecha, this.NroCajero, tipoOperacion, monto);
+                        cuenta.extraccionPreacordada(monto, operacion);
+                        saldoActual = cuenta.getSaaldoActual();
+                        Console.WriteLine($"Saldo: {saldoActual}");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Saldo insuficiente");
+                    }
+                }
+            }
+        }
+
+        class CuentaBancaria
+        {
+            private int nroCuenta;
+            private double SaldoActual;
+            private DateTime FechaApertura;
+            private Usuario usuario;
+            private List <Operacion> Loperaciones = new List<Operacion>();
+
+          
+            public CuentaBancaria(DateTime fechaApertura, Usuario usuario)
+            {
+                this.nroCuenta = getNroCuenta();
+                this.SaldoActual = 0.0;
+                this.FechaApertura = fechaApertura;
+                this.usuario = usuario;
+            }
+
+            public void deposito(int monto, Operacion operacion)
+            {
+                Loperaciones.Add(operacion);
+                this.SaldoActual += monto;
+            }
+
+            public void extraccion(int monto, Operacion operacion)
+            {
+                Loperaciones.Add(operacion);
+                this.SaldoActual -= monto;
+            }
+
+            public void extraccionPreacordada(int monto, Operacion operacion)
+            {
+                Loperaciones.Add(operacion);
+                this.SaldoActual -= monto;
+            }
+
+            public bool controlarTipoUs(int monto, Usuario usuario)
+            {
+                bool control = true;
+                double operacion = this.SaldoActual - monto;
+
+                if (monto > this.SaldoActual)
+                {
+                    if (usuario.getTipoUs() == "Activo laboralmente")
+                    {
+                        
+                        if (operacion < -20000)
+                        {
+                            control = false;
+                        }
+                    }
+                    else 
+                    {
+                        if (operacion < -10000)
+                        {
+                            control = false;
+                        }
+                    }               
+                }         
+                return control;
+            }
+
+            public bool controlarHistorial()
+            {
+                bool control = true;
+                TimeSpan controlFecha;
+                double controlMonto = 0.0;
+                List<DateTime> LdateTimes = new List<DateTime>();  
+
+                foreach (Operacion i in Loperaciones)
+                {
+                    if(i.getTipoOperacion() == "Extraccion" || i.getTipoOperacion() == "Extraccion Preacordada")
+                    {
+                        controlMonto -= i.getMonto();
+                    }
+                    else
+                    {
+                        controlMonto += i.getMonto();
+                    }
+                    
+                    if (controlMonto > 20000)
+                    {
+                        LdateTimes.Add(i.getFecha());
+                        controlFecha = LdateTimes.LastOrDefault() - LdateTimes.FirstOrDefault();
+                        if (controlFecha.Days >= 60)
+                        {
+                            control = true;
+                            break;
+                        }
+                    }
+                    else
+                    {                        
+                            LdateTimes.Clear();
+                            control = false;  
+                    }
+                }
+                return control;
+            }
+
+            private int getNroCuenta()
+            {
+                Random rnd = new Random(Guid.NewGuid().GetHashCode());
+                int nroCuenta = rnd.Next(100000000, 1000000000);
+                return nroCuenta;
+            }
+
+            public Usuario GetUsuario()
+            {
+                return this.usuario;
+            }
+
+            public double getSaaldoActual()
+            {
+                return this.SaldoActual;
+            }
+        }
+
+        class Usuario
+        {
+            private string id;
+            private string nombre;
+            private string contraseña;
+            private string direccion;
+            private string tipoUs;
+
+            public Usuario(string nombre, string contraseña, string direccion, string tipoUs)
+            {
+                this.nombre = nombre;
+                this.contraseña = contraseña;
+                this.direccion = direccion;
+                this.tipoUs = tipoUs;
+                this.id = CreateID();
+            }
+
+            private string CreateID()
+            {
+                string id = string.Empty;
+                id = Guid.NewGuid().ToString();
+                return id;
+            }
+
+            public String getTipoUs()
+            {
+                return tipoUs;
+            }
+
+            public String getContraseña()
+            {
+                return contraseña;
+            }
+            public String getNombre()
+            {
+                return nombre;
+            }
+
+        }
+
+        class Operacion
+        {
+            private DateTime fecha;
+            private int cajero;
+            private string tipoOperacion;
+            private int monto;
+
+            public Operacion(DateTime fecha, int cajero, string tipoOperacion, int monto)
+            {
+                this.fecha = fecha;
+                this.cajero = cajero;
+                this.tipoOperacion = tipoOperacion;
+                this.monto = monto;
+            }
+
+            public DateTime getFecha()
+            {
+                return fecha;
+            }
+
+            public int getCajero()
+            {
+                return cajero;
+            }
+
+            public String getTipoOperacion()
+            {
+                return tipoOperacion;
+            }
+
+            public int getMonto()
+            {
+                return monto;
+            }
+        }
+    }
+}

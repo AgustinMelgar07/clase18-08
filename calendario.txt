@@ -1,0 +1,439 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Calendario
+{
+    public class Materia
+    {
+        private string nomMat;
+        private string dia;
+        private TimeOnly horaIni, horaFin;
+
+        public string NomMat { get => nomMat; set => nomMat = value; }
+        
+        public TimeOnly HoraIni { get => horaIni; set => horaIni = value; }
+        public TimeOnly HoraFin { get => horaFin; set => horaFin = value; }
+        public string Dia { get => dia; set => dia = value; }
+
+        public Materia(string nomMat, string dia, TimeOnly hi, TimeOnly hf)
+        {
+            this.nomMat = nomMat;
+            this.Dia = dia;
+            this.horaIni = hi;
+            this.horaFin = hf;
+        }
+
+        public string ToString()
+        {
+            return string.Format("Materia: {0}, Dia: {1}, Inicio: {2}, Fin: {3}", nomMat, dia, horaIni, horaFin);
+        }
+
+
+        public bool Equals(Materia other)
+        {
+            if (this.dia.ToUpper() == other.dia.ToUpper())
+            {
+                if(other.horaFin < this.horaIni)
+                {
+                    return false;
+                }
+                else
+                {
+                    if(other.horaIni > this.horaFin)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
+}
+*************************************
+using Calendario;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Numerics;
+using System.Runtime.Intrinsics.X86;
+using System.Security.Cryptography;
+
+namespace Dias
+{
+    public enum DiasSemana
+    {
+        LUNES, MARTES, MIERCOLES, JUEVES, VIERNES, SABADO, DOMINGO
+    }
+    public class Dias
+    {
+        private static void Main(string[] args)
+        {
+            bool salir=false, esEntero;
+            int cantMat, opc;
+            List<Materia> list = new List<Materia>();
+
+            do
+            {                
+                Console.WriteLine("Elija una de las siguientes opciones: ");
+                Console.WriteLine("\t1. Cargar Materias.");
+                Console.WriteLine("\t2. Modificar Materias.");
+                Console.WriteLine("\t3. Mostrar por dia.");
+                Console.WriteLine("\t4. Mostrar por materia.");
+                Console.WriteLine("\t5. Salir.");
+                Console.Write("Opcion: ");
+                esEntero = int.TryParse(Console.ReadLine(), out opc); 
+                if (esEntero)
+                {
+                    switch (opc)
+                    {
+                        case 1:
+                            Console.WriteLine();
+                            Console.WriteLine("\nHa seleccionado la opcion de carga de materias.\n");
+                            Console.WriteLine("Ingrese la cantidad de materias a agregar en el calendario:");
+                            cantMat=int.Parse(Console.ReadLine());
+                            Console.WriteLine();
+                            Carga(cantMat,list);
+                            Console.WriteLine();
+                            break;
+
+                        case 2:
+                            Console.WriteLine("\nHa seleccionado la opcion de modificacion de materias.\n");
+                            Modificar(list);
+                            if(list.Count > 0)
+                            {
+                                Console.WriteLine("\nDatos de la lista modificada:\n");
+                                MostrarXMat(list);
+                            }
+                            break;
+
+                        case 3:
+                            Console.WriteLine("\nHa seleccionado la opcion de mostrar por dia.\n");
+                            MostrarXDia(list);
+                            break;
+                        case 4:
+                            Console.WriteLine("\nHa seleccionado la opcion de mostrar por materia.\n");
+                            MostrarXMat(list);
+                            break;
+                        case 5:
+                            salir = true;
+                            break;
+                        default:
+                            Console.WriteLine("\nElige una opcion entre 1 y 5\n");
+                            break;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("\nIngrese una opcion valida.\n");
+                }
+            } while (!salir);
+        }
+        
+        public static void Carga(int cantidad, List<Materia> list)
+        {
+            TimeOnly inicio, fin;
+            string materia, dia,hora1, hora2;
+            bool continuar = true, continuar2 = true;
+
+            for (int i = 0; i < cantidad; i++)
+            {
+                //comprobacion de vacios o NULL
+                do
+                {
+                    Console.WriteLine("Ingrese nombre de la materia: ");
+                    materia = Console.ReadLine().ToUpper();
+                    Console.WriteLine("Ingrese dia de la materia: ");
+                    dia = Console.ReadLine().ToUpper();
+
+                    if (String.IsNullOrEmpty(materia) || String.IsNullOrEmpty(dia))
+                    {
+                        Console.WriteLine("\nEs requerido ingresar un valor en ambos campos.\n");
+                        Console.WriteLine("Ingrese nombre de la materia: ");
+                        materia = Console.ReadLine().ToUpper();
+                        Console.WriteLine("Ingrese dia de la materia: ");
+                        dia = Console.ReadLine().ToUpper();
+                    }
+
+                    if (String.IsNullOrEmpty(materia))
+                    {
+                        Console.WriteLine("\nEs requerido ingresar un valor en el campo materia.\n");
+                        Console.WriteLine("Ingrese nombre de la materia: ");
+                        materia = Console.ReadLine().ToUpper();
+                    }
+
+                    if (String.IsNullOrEmpty(dia))
+                    {
+                        Console.WriteLine("\nEs requerido ingresar un valor en el campo dia.\n");
+                        Console.WriteLine("Ingrese dia de la materia: ");
+                        dia = Console.ReadLine().ToUpper();
+                    }
+
+                    do
+                    {
+                        if (!Enum.IsDefined(typeof(DiasSemana), dia))
+                        {
+                            Console.WriteLine("\nIngrese un dia valido.\n");
+                            Console.WriteLine("Ingrese dia de la materia: ");
+                            dia = Console.ReadLine().ToUpper();
+                        }
+                    } while (!Enum.IsDefined(typeof(DiasSemana), dia));
+
+                } while (String.IsNullOrEmpty(materia) || String.IsNullOrEmpty(dia));
+
+                try
+                {
+                    Console.WriteLine("Ingrese la hora de inicio en formato HH:MM: ");
+                    hora1 = Console.ReadLine();
+                    inicio = TimeOnly.Parse(hora1);
+                    Console.WriteLine("Ingrese la hora de fin en formato HH:MM: ");
+                    hora2 = Console.ReadLine();
+                    fin = TimeOnly.Parse(hora2);
+                    do
+                    {
+                        if (inicio == fin)
+                        {
+                            Console.WriteLine("\nHa ingresado el inicio igual al fin.\n");
+                            Console.WriteLine("Ingrese la hora de inicio en formato HH:MM: ");
+                            hora1 = Console.ReadLine();
+                            inicio = TimeOnly.Parse(Console.ReadLine());
+                            Console.WriteLine("Ingrese la hora de fin en formato HH:MM: ");
+                            hora2 = Console.ReadLine();
+                            fin = TimeOnly.Parse(Console.ReadLine());
+                        }
+                        if (fin < inicio)
+                        {
+                            Console.WriteLine("\nEl horario de fin no puede ser menor al de inicio.\n");
+                            Console.WriteLine("Ingrese la hora de inicio en formato HH:MM: ");
+                            inicio = TimeOnly.Parse(Console.ReadLine());
+                            Console.WriteLine("Ingrese la hora de fin en formato HH:MM: ");
+                            fin = TimeOnly.Parse(Console.ReadLine());
+                        }
+
+                    } while (inicio > fin);
+                    
+                    //objeto auxiliar
+                    var aux = new Materia(materia, dia, inicio, fin);
+
+                    //verifica la materia nueva con las existentes en la lista
+                    foreach (Materia materias in list)
+                    {
+                        if (materias.Equals(aux))
+                        {
+                            continuar = false;
+                        }
+                    }
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine("\nEl horario debe ser de la forma HH:MM.\n");
+                    continuar2 = false;
+                }
+
+                //agrega la materia si coincide con los parametros correctos sino emite msj de error
+                if (continuar)
+                {
+                    list.Add(new Materia(materia, dia, inicio, fin));
+                }
+                else
+                {
+                    Console.WriteLine("\nLos datos ingresados de la materia coinciden con una materia ya creada");
+                }
+            }
+            
+            if (continuar2)
+            {
+                Console.WriteLine();
+                MostrarXMat(list);
+            }            
+        }
+        public static void Modificar(List<Materia> list)
+        {
+            int i=0, opc, opc2=0;
+            string materia, dia;
+            TimeOnly hora1, hora2;
+            bool continuar = false;
+
+            if (list.Count == 0)
+            {
+                Console.WriteLine("\nPrimero debe cargar las materias\n");
+            }
+            else
+            {
+                //mostrar materias para que se seleccione el indice de la materia a modificar
+                for (int x = 0; x < list.Count; x++)
+                {
+                    Console.WriteLine("[{0}] {1}",x, list[x].ToString());
+                }
+                
+                Console.WriteLine();
+                Console.WriteLine("A continuacion, ingrese el indice de la materia que quiera modificar:");
+                i = int.Parse(Console.ReadLine());
+                Console.WriteLine("\nQue accion desea hacer?");
+                Console.WriteLine("1. Eliminar elemento");
+                Console.WriteLine("2. Modificar datos cargados.");
+                Console.Write("Opcion: ");
+                opc = int.Parse(Console.ReadLine());
+                Console.WriteLine();
+                switch (opc)
+                {
+                    case 1:
+                        list.RemoveAt(i);
+                        Console.WriteLine("Elemento eliminado con exito.");
+                        break;                        
+                    case 2:
+                        Console.WriteLine("\nQue dato desea modificar?");
+                        Console.WriteLine("1. Nombre.");
+                        Console.WriteLine("2. Dia.");
+                        Console.WriteLine("3. Horario");
+                        Console.Write("Opcion: ");
+                        opc2 = int.Parse(Console.ReadLine());
+                        continuar = true;
+                        break;
+                    default:
+                        Console.WriteLine("\nElige una opcion entre 1 y 3\n");
+                        break;
+                }                
+            }
+
+            if (continuar)
+            {
+                switch (opc2)
+                {
+                    case 1:
+                        do
+                        {
+                            Console.WriteLine("Ingrese nombre de la materia: ");
+                            materia = Console.ReadLine();
+                            if (String.IsNullOrEmpty(materia))
+                            {
+                                Console.WriteLine("\nEs requerido ingresar un valor en el campo materia.\n");
+                                Console.WriteLine("Ingrese nombre de la materia: ");
+                                materia = Console.ReadLine();
+                            }
+                        } while (String.IsNullOrEmpty(materia));
+                        list[i].NomMat = materia;
+                        break;
+                    case 2:
+                        do
+                        {
+                            Console.WriteLine("Ingrese dia de la materia: ");
+                            dia = Console.ReadLine().ToUpper();
+                            if (!Enum.IsDefined(typeof(DiasSemana), dia))
+                            {
+                                Console.WriteLine("\nIngrese un dia valido.\n");
+                            }
+                        } while (!Enum.IsDefined(typeof(DiasSemana), dia));
+                        //falta verificar que no coincidan las horas antes de modificar el dia
+                        list[i].Dia = dia;
+                        break;
+                    case 3:
+                        do
+                        {
+                            Console.WriteLine("Ingrese la hora de inicio en formato HH:MM: ");
+                            hora1 = TimeOnly.Parse(Console.ReadLine());
+                            Console.WriteLine("Ingrese la hora de fin en formato HH:MM: ");
+                            hora2 = TimeOnly.Parse(Console.ReadLine());
+                            if (hora1 == hora2)
+                            {
+                                Console.WriteLine("\nHa ingresado el inicio igual al fin.\n");
+                            }
+                            if (hora2 < hora1)
+                            {
+                                Console.WriteLine("\nEl horario de fin no puede ser menor al de inicio.\n");
+                            }
+                        } while (hora1 > hora2);
+                        //falta verificar que no coincidan las horas de inicio y fin antes de modificar el horario
+                        list[i].HoraIni = hora1;
+                        list[i].HoraFin = hora2;
+                        break;
+                }
+                Console.WriteLine("\nLa modificacion se realizo con exito.\n");
+            }
+        }
+
+        public static void MostrarXMat(List<Materia> list)
+        {
+            ArrayList aux = new ArrayList();
+
+            //carga el arraylist aux con todas las materias que haya en el "list"
+            foreach (Materia materias in list)
+            {
+                aux.Add(materias.NomMat);
+            }
+
+            for (int j = 0; j < aux.Count; j++) 
+            {
+                Console.WriteLine(aux[j]);
+                for (int i = 0; i < list.Count; i++)
+                {
+                    if (list[i].NomMat == aux[j])
+                    {
+                        Console.WriteLine("Dia: {0}, Inicio: {1}, Fin: {2}", list[i].Dia, list[i].HoraIni, list[i].HoraFin);
+                    }
+                }                               
+            }            
+        }
+        public static void MostrarXDia(List<Materia> list)
+        {
+            Console.WriteLine("Materias por dia: ");
+            Console.WriteLine("Lunes: ");
+            foreach (Materia materias in list)
+            {
+                if (materias.Dia == "LUNES")
+                {
+                    Console.WriteLine("\tMateria: {0}, Inicio: {1}, Fin: {2}", materias.NomMat, materias.HoraIni, materias.HoraFin);
+                }
+            }
+            Console.WriteLine("Martes: ");
+            foreach (Materia materias in list)
+            {
+                if (materias.Dia == "MARTES")
+                {
+                    Console.WriteLine("\tMateria: {0}, Inicio: {1}, Fin: {2}", materias.NomMat, materias.HoraIni, materias.HoraFin);
+                }
+            }
+            Console.WriteLine("Miercoles: ");
+            foreach (Materia materias in list)
+            {
+                if (materias.Dia == "MIERCOLES")
+                {
+                    Console.WriteLine("\tMateria: {0}, Inicio: {1}, Fin: {2}", materias.NomMat, materias.HoraIni, materias.HoraFin);
+                }
+            }
+            Console.WriteLine("Jueves: ");
+            foreach (Materia materias in list)
+            {
+                if (materias.Dia == "JUEVES")
+                {
+                    Console.WriteLine("\tMateria: {0}, Inicio: {1}, Fin: {2}", materias.NomMat, materias.HoraIni, materias.HoraFin);
+                }
+            }
+            Console.WriteLine("Viernes: ");
+            foreach (Materia materias in list)
+            {
+                if (materias.Dia == "VIERNES")
+                {
+                    Console.WriteLine("\tMateria: {0}, Inicio: {1}, Fin: {2}", materias.NomMat, materias.HoraIni, materias.HoraFin);
+                }
+            }
+            Console.WriteLine("Sabado: ");
+            foreach (Materia materias in list)
+            {
+                if (materias.Dia == "SABADO")
+                {
+                    Console.WriteLine("\tMateria: {0}, Inicio: {1}, Fin: {2}", materias.NomMat, materias.HoraIni, materias.HoraFin);
+                }
+            }
+        }
+    }
+}
